@@ -1,0 +1,9 @@
+###################################################################################################
+# User allowlist. Add URLs here without the preceding http:// or https:// and without the trailing
+# slash. Comment out entries with #
+###################################################################################################
+
+masto.ai
+dnscheck.tools
+firebaseinstallations.googleapis.com
+ngrn.uk
