@@ -58,13 +58,13 @@ fi
 "$CURL" --silent "${LIST_URL_04}" >> "${LIST_TMPFILE}" || { (>&2 printf "%s failed to download, exiting\n" "${LIST_URL_04}") ; exit 1; }
 
 # Strip comments and any existing RPZ headers
-"$SED" -i '/^\;.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE_ALL}") ; exit 1; }
-"$SED" -i '/^\@.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE_ALL}") ; exit 1; }
-"$SED" -i '/^\$.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE_ALL}") ; exit 1; }
-"$SED" -i '/^.*NS.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE_ALL}") ; exit 1; }
+"$SED" -i '/^\;.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
+"$SED" -i '/^\@.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
+"$SED" -i '/^\$.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
+"$SED" -i '/^.*NS.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
 # Strips inline comments from urlhaus list
-"$SED" -i 's/\ \;\ .*//' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE_ALL}") ; exit 1; }
-"$SED" -i 's/\.\;\ .*/\./' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE_ALL}") ; exit 1; }
+"$SED" -i 's/\ \;\ .*//' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
+"$SED" -i 's/\.\;\ .*/\./' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
 
 # Add the wildcard domains to the urlhaus list
 #if test -f "${LIST_TMPFILE_04}"; then
