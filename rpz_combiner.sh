@@ -22,6 +22,7 @@ readonly SORT="/usr/bin/sort"
 
 readonly RESOLVER_CONF_DIR="/etc/knot-resolver/blocklist_combiner"
 
+# More lists can be added in .rpz format, but are not guaranteed to work
 readonly LIST_URL_01="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/rpz/ultimate.txt"
 readonly LIST_URL_02="https://big.oisd.nl/rpz"
 readonly LIST_URL_03="https://raw.githubusercontent.com/badmojr/1Hosts/master/Pro/rpz.txt"
@@ -36,9 +37,7 @@ readonly LIST_COMBINED="$RESOLVER_CONF_DIR/blocklist_combined.rpz"
 
 # RPZ header serial number = seconds since the UNIX Epoch (1970-01-01 00:00 UTC)
 RPZ_HEADER_SERIAL=$($DATE +"%s")
-RPZ_HEADER_LINE_01="\$TTL 300\\n"
-RPZ_HEADER_LINE_02="@ SOA localhost. root.localhost. $RPZ_HEADER_SERIAL 43200 3600 86400 120\\n"
-RPZ_HEADER_LINE_03="  NS  localhost.\\n"
+RPZ_HEADER_LINE="\$TTL 300\\n@ SOA localhost. root.localhost. $RPZ_HEADER_SERIAL 43200 3600 86400 120\\n  NS  localhost.\\n"
 
 ###########################
 ## Start doing the thing ##
@@ -97,11 +96,11 @@ if test -f "${USER_ALLOWLIST}"; then
     done
 fi
 
-# Sort the list into alphabetical order
+# Sort the list into a rough approximation of alphabetical order
 "$SORT" -o ${LIST_TMPFILE} -u -f ${LIST_TMPFILE} || { (>&2 printf "Something went wrong sorting the blocklists, exiting\n") ; exit 1; }
 
-# Add the RPZ headers at the start of the file
-"$SED" -i "1s/^/$RPZ_HEADER_LINE_01$RPZ_HEADER_LINE_02$RPZ_HEADER_LINE_03/" "${LIST_TMPFILE}" || { (>&2 printf "Something went wrong adding the RPZ header, exiting\n") ; exit 1; }
+# Add the RPZ headers at the beginning of the file
+"$SED" -i "1s/^/$RPZ_HEADER_LINE/" "${LIST_TMPFILE}" || { (>&2 printf "Something went wrong adding the RPZ header, exiting\n") ; exit 1; }
 
 # Move the .tmp file into the correct place
 "$MV" "${LIST_TMPFILE}" "${LIST_COMBINED}" || { (>&2 printf "Moving the blocklist .tmp file to its final destination failed, exiting\n") ; exit 1; }
