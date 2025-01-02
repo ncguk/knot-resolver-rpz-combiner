@@ -37,7 +37,7 @@ readonly LIST_COMBINED="$RESOLVER_CONF_DIR/blocklist_combined.rpz"
 
 # RPZ header serial number = seconds since the UNIX Epoch (1970-01-01 00:00 UTC)
 RPZ_HEADER_SERIAL=$($DATE +"%s")
-RPZ_HEADER_LINE="\$TTL 300\\n@ SOA localhost. root.localhost. $RPZ_HEADER_SERIAL 43200 3600 86400 120\\n  NS  localhost.\\n"
+readonly RPZ_HEADER_LINE="\$TTL 300\\n@ SOA localhost. root.localhost. $RPZ_HEADER_SERIAL 43200 3600 86400 120\\n  NS  localhost.\\n"
 
 ###########################
 ## Start doing the thing ##
@@ -57,11 +57,8 @@ fi
 "$CURL" --silent "${LIST_URL_04}" >> "${LIST_TMPFILE}" || { (>&2 printf "%s failed to download, exiting\n" "${LIST_URL_04}") ; exit 1; }
 
 # Strip comments and any existing RPZ headers
-"$SED" -i '/^\;.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
-"$SED" -i '/^\@.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
-"$SED" -i '/^\$.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
-"$SED" -i '/^.*NS.*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
-# Strips inline comments from urlhaus list
+"$SED" -i -E '/^(\;|\@|\$|.*NS).*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
+# Strip inline comments from urlhaus list
 "$SED" -i 's/\ \;\ .*//' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
 "$SED" -i 's/\.\;\ .*/\./' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
 
@@ -102,5 +99,5 @@ fi
 # Add the RPZ headers at the beginning of the file
 "$SED" -i "1s/^/$RPZ_HEADER_LINE/" "${LIST_TMPFILE}" || { (>&2 printf "Something went wrong adding the RPZ header, exiting\n") ; exit 1; }
 
-# Move the .tmp file into the correct place
+# Move the .tmp file to the specified place
 "$MV" "${LIST_TMPFILE}" "${LIST_COMBINED}" || { (>&2 printf "Moving the blocklist .tmp file to its final destination failed, exiting\n") ; exit 1; }
