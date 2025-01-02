@@ -12,7 +12,6 @@
 #set -x
 
 # Eat your variables
-readonly CP="/usr/bin/cp"
 readonly CURL="/usr/bin/curl"
 readonly DATE="/usr/bin/date"
 readonly GREP="/usr/bin/grep"
@@ -46,7 +45,7 @@ readonly RPZ_HEADER_LINE="\$TTL 300\\n@ SOA localhost. root.localhost. $RPZ_HEAD
 # Check if a combined blocklist exists and, if so, make a backup
 if test -f "${LIST_COMBINED}"; then
     (>&2 printf "Found existing combined blocklist, making backup...\n")
-    "$CP" "${LIST_COMBINED}" "${LIST_COMBINED}.backup"
+    "$MV" "${LIST_COMBINED}" "${LIST_COMBINED}.backup"
 fi
 
 # Fetch the blocklists
