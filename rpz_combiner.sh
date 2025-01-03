@@ -54,6 +54,9 @@ fi
 "$CURL" --silent "${LIST_URL_02}" >> "${LIST_TMPFILE}" || { (>&2 printf "%s failed to download, exiting\n" "${LIST_URL_02}") ; exit 1; }
 "$CURL" --silent "${LIST_URL_03}" >> "${LIST_TMPFILE}" || { (>&2 printf "%s failed to download, exiting\n" "${LIST_URL_03}") ; exit 1; }
 "$CURL" --silent "${LIST_URL_04}" >> "${LIST_TMPFILE}" || { (>&2 printf "%s failed to download, exiting\n" "${LIST_URL_04}") ; exit 1; }
+(>&2 printf "Downloads complete...\n")
+
+(>&2 printf "Formatting the combined blocklist...\n")
 
 # Strip comments and any existing RPZ headers
 "$SED" -i -E '/^(\;|\@|\$|.*NS).*$/d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong processing %s, exiting\n" "${LIST_TMPFILE}") ; exit 1; }
@@ -71,8 +74,6 @@ fi
 # Delete lines longer than 256 character to avoid a bug in Unbound (248 characters + the later added ' CNAME .')
 "$SED" -i '/^.\{247\}./d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong checking line lengths, exiting\n") ; exit 1; }
 "$SED" -i '/^\*\..\{247\}./d' ${LIST_TMPFILE} || { (>&2 printf "Something went wrong checking line lengths, exiting\n") ; exit 1; }
-
-(>&2 printf "Creating the combined blocklist...\n")
 
 # Basic blocklist filtering
 if test -f "${USER_BLOCKLIST}"; then
@@ -93,10 +94,13 @@ if test -f "${USER_ALLOWLIST}"; then
 fi
 
 # Sort the list into a rough approximation of alphabetical order
-"$SORT" -o ${LIST_TMPFILE} -u -f ${LIST_TMPFILE} || { (>&2 printf "Something went wrong sorting the blocklists, exiting\n") ; exit 1; }
+(>&2 printf "Sorting the combined blocklist and removing duplicates...\n")
+"$SORT" -o ${LIST_TMPFILE} --buffer-size=50% --parallel=4 -u -f ${LIST_TMPFILE} || { (>&2 printf "Something went wrong sorting the combined blocklist, exiting\n") ; exit 1; }
 
 # Add the RPZ headers at the beginning of the file
+(>&2 printf "Adding the RPZ headers...\n")
 "$SED" -i "1s/^/$RPZ_HEADER_LINE/" "${LIST_TMPFILE}" || { (>&2 printf "Something went wrong adding the RPZ header, exiting\n") ; exit 1; }
 
 # Move the .tmp file to the specified place
+(>&2 printf "Finishing up...\n")
 "$MV" "${LIST_TMPFILE}" "${LIST_COMBINED}" || { (>&2 printf "Moving the blocklist .tmp file to its final destination failed, exiting\n") ; exit 1; }
